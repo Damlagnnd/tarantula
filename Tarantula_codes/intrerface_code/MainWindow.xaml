@@ -1,0 +1,818 @@
+<Window x:Class="TarantulaControl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="TARANTULA — Multi-Agent Control Panel"
+        Height="900" Width="1600"
+        MinHeight="800" MinWidth="1400"
+        Background="#0A0C10"
+        FontFamily="Consolas"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
+
+    <Window.Resources>
+        <Style x:Key="NavBtn" TargetType="Button">
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="Foreground" Value="#58D6FF"/>
+            <Setter Property="BorderBrush" Value="#1F6FEB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="66"/>
+            <Setter Property="Height" Value="66"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1F2D3D"/>
+                                <Setter Property="BorderBrush" Value="#58D6FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1F6FEB"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#0D1117"/>
+                                <Setter Property="Foreground" Value="#30363D"/>
+                                <Setter Property="BorderBrush" Value="#21262D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="StopBtn" TargetType="Button" BasedOn="{StaticResource NavBtn}">
+            <Setter Property="Foreground" Value="#FF4040"/>
+            <Setter Property="BorderBrush" Value="#CC2222"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2D1616"/>
+                    <Setter Property="BorderBrush" Value="#FF4040"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#CC2222"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background" Value="#0D1117"/>
+            <Setter Property="Foreground" Value="#3FB950"/>
+            <Setter Property="BorderBrush" Value="#238636"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#163324"/>
+                                <Setter Property="BorderBrush" Value="#3FB950"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#238636"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.35"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DangerBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Foreground" Value="#FF4040"/>
+            <Setter Property="BorderBrush" Value="#CC2222"/>
+            <Setter Property="Background" Value="#1A0A0A"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2D1616"/>
+                    <Setter Property="BorderBrush" Value="#FF4040"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="#0D1117"/>
+            <Setter Property="BorderBrush" Value="#21262D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+
+        <Style x:Key="SL" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#484F58"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style x:Key="VT" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#C9D1D9"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="42"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#0D1117" BorderBrush="#21262D" BorderThickness="0,0,0,1">
+            <Grid Margin="14,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="T  A  R  A  N  T  U  L  A" FontSize="17" FontWeight="Bold"
+                               Foreground="#58D6FF" FontFamily="Consolas"/>
+                    <TextBlock Text="   //   MULTI-AGENT ROBOT CONTROL PANEL   //   COM6064"
+                               FontSize="10" Foreground="#30363D" FontFamily="Consolas"
+                               VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border x:Name="ModeBadge" Background="#0D2818" BorderBrush="#238636"
+                            BorderThickness="1" CornerRadius="3" Padding="8,2" Margin="0,0,14,0">
+                        <TextBlock x:Name="ModeText" Text="MANUEL MOD" FontSize="10"
+                                   Foreground="#3FB950" FontFamily="Consolas" FontWeight="Bold"/>
+                    </Border>
+                    <TextBlock x:Name="StatusDot" Text="● BAĞLI DEĞİL" FontSize="10"
+                               Foreground="#484F58" FontFamily="Consolas"
+                               VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    <TextBlock x:Name="ClockText" Text="00:00:00" FontSize="15"
+                               Foreground="#30363D" FontFamily="Consolas" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="#0D1117" BorderBrush="#21262D" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0">
+                <TextBlock Text="PORT" Foreground="#484F58" FontSize="9" FontFamily="Consolas"
+                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                <ComboBox x:Name="ComboPorts" Width="100" Height="26"
+                          Background="#161B22" Foreground="#C9D1D9" BorderBrush="#30363D"
+                          FontFamily="Consolas" FontSize="11"
+                          VerticalContentAlignment="Center" Padding="5,0"
+                          DropDownOpened="ComboPorts_DropDownOpened"/>
+
+                <ComboBox x:Name="ComboBaud" Width="80" Height="26" Margin="4,0,0,0"
+                          Background="#161B22" Foreground="#C9D1D9" BorderBrush="#30363D"
+                          FontFamily="Consolas" FontSize="11"
+                          VerticalContentAlignment="Center" Padding="5,0">
+                    <ComboBoxItem Content="9600" IsSelected="True"/>
+                    <ComboBoxItem Content="115200"/>
+                </ComboBox>
+
+                <Button x:Name="BtnConnect" Content="CONNECT" Style="{StaticResource ActionBtn}"
+                        Margin="6,0,3,0" Click="BtnConnect_Click"/>
+                <Button x:Name="BtnDisconnect" Content="DISCONNECT" Style="{StaticResource DangerBtn}"
+                        IsEnabled="False" Click="BtnDisconnect_Click"/>
+
+                <Rectangle Width="1" Height="22" Fill="#21262D" Margin="14,0"/>
+
+                <TextBlock Text="MOD:" Foreground="#484F58" FontSize="9"
+                           FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                <Button x:Name="BtnManuelMod" Content="MANUEL" Style="{StaticResource ActionBtn}"
+                        Margin="0,0,3,0" Click="BtnManuelMod_Click"/>
+
+                <Button x:Name="BtnAutonomMod" Content="OTONOM" Style="{StaticResource ActionBtn}"
+                        Foreground="#F0AD4E" BorderBrush="#7D4E00" Background="#1A1000"
+                        Click="BtnAutonomMod_Click"/>
+
+                <Rectangle Width="1" Height="22" Fill="#21262D" Margin="14,0"/>
+
+                <TextBlock Text="HEDEF:" Foreground="#484F58" FontSize="9"
+                           FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                <TextBlock x:Name="TargetGpsText" Text="QR bekleniyor..."
+                           FontSize="11" Foreground="#30363D" FontFamily="Consolas"
+                           VerticalAlignment="Center" Margin="0,0,14,0"/>
+
+                <Button x:Name="BtnSendTarget" Content="⚡ SLAVE'E HEDEF GÖNDER (OVERRIDE)"
+                        Style="{StaticResource ActionBtn}"
+                        Foreground="#A78BFA" BorderBrush="#5B21B6" Background="#1A1A2E"
+                        IsEnabled="False" Click="BtnSendTarget_Click"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Background="#0D1117" BorderBrush="#21262D" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0">
+                <TextBlock Text="📷 RPI CAM" Foreground="#484F58" FontSize="9"
+                           FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                <TextBox x:Name="TxtCamUrl" Width="260" Height="26"
+                         Background="#161B22" Foreground="#C9D1D9" BorderBrush="#30363D"
+                         FontFamily="Consolas" FontSize="11"
+                         VerticalContentAlignment="Center" Padding="5,0"
+                         Text="http://192.168.1.100:8080/?action=stream"/>
+
+                <Button x:Name="BtnCamConnect" Content="RPI STREAM" Style="{StaticResource ActionBtn}"
+                        Margin="6,0,3,0" Click="BtnCamConnect_Click"/>
+
+                <Button x:Name="BtnCamStop" Content="DURDUR" Style="{StaticResource DangerBtn}"
+                        IsEnabled="False" Click="BtnCamStop_Click"/>
+
+                <TextBlock x:Name="FpsText" Text="— FPS" FontSize="10"
+                           Foreground="#30363D" FontFamily="Consolas"
+                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+
+                <Rectangle Width="1" Height="22" Fill="#21262D" Margin="12,0"/>
+
+                <TextBlock Text="🖥 UNITY VIEW" Foreground="#484F58" FontSize="9"
+                           FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                <TextBox x:Name="TxtUnityCamUrl" Width="260" Height="26"
+                         Background="#161B22" Foreground="#C9D1D9" BorderBrush="#30363D"
+                         FontFamily="Consolas" FontSize="11"
+                         VerticalContentAlignment="Center" Padding="5,0"
+                         Text="http://127.0.0.1:8080/stream"/>
+
+                <Button x:Name="BtnUnityCamConnect" Content="UNITY VIEW" Style="{StaticResource ActionBtn}"
+                        Margin="6,0,3,0" Click="BtnUnityCamConnect_Click"/>
+
+                <Button x:Name="BtnUnityCamStop" Content="DURDUR" Style="{StaticResource DangerBtn}"
+                        IsEnabled="False" Click="BtnUnityCamStop_Click"/>
+
+                <TextBlock x:Name="UnityCamFpsText" Text="— FPS" FontSize="10"
+                           Foreground="#30363D" FontFamily="Consolas"
+                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+
+                <Rectangle Width="1" Height="22" Fill="#21262D" Margin="12,0"/>
+
+                <TextBlock Text="🎮 UNITY TCP" Foreground="#484F58" FontSize="9"
+                           FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                <TextBox x:Name="TxtUnityHost" Width="125" Height="26"
+                         Background="#161B22" Foreground="#C9D1D9" BorderBrush="#30363D"
+                         FontFamily="Consolas" FontSize="11"
+                         VerticalContentAlignment="Center" Padding="5,0"
+                         Text="127.0.0.1:7777"/>
+
+                <Button x:Name="BtnUnityConnect" Content="BAĞLAN" Style="{StaticResource ActionBtn}"
+                        Margin="6,0,3,0" Click="BtnUnityConnect_Click"/>
+
+                <Button x:Name="BtnUnityDisconnect" Content="KES" Style="{StaticResource DangerBtn}"
+                        IsEnabled="False" Click="BtnUnityDisconnect_Click"/>
+
+                <TextBlock x:Name="UnityStatusText" Text="● BAĞLI DEĞİL"
+                           FontSize="10" Foreground="#30363D" FontFamily="Consolas"
+                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3" Margin="6,6,6,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="255"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="290"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="MASTER — MANUEL KONTROL" Style="{StaticResource SL}"/>
+
+                        <Grid Width="204" HorizontalAlignment="Center" Margin="0,2,0,2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="68"/>
+                                <RowDefinition Height="68"/>
+                                <RowDefinition Height="68"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="68"/>
+                                <ColumnDefinition Width="68"/>
+                                <ColumnDefinition Width="68"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Row="0" Grid.Column="1" Content="▲"
+                                    Style="{StaticResource NavBtn}" x:Name="BtnForward"
+                                    IsEnabled="False" Click="BtnForward_Click"/>
+
+                            <Button Grid.Row="1" Grid.Column="0" Content="◀"
+                                    Style="{StaticResource NavBtn}" x:Name="BtnLeft"
+                                    IsEnabled="False" Click="BtnLeft_Click"/>
+
+                            <Button Grid.Row="1" Grid.Column="1" Content="■"
+                                    Style="{StaticResource StopBtn}" x:Name="BtnStop"
+                                    IsEnabled="False" Click="BtnStop_Click"/>
+
+                            <Button Grid.Row="1" Grid.Column="2" Content="▶"
+                                    Style="{StaticResource NavBtn}" x:Name="BtnRight"
+                                    IsEnabled="False" Click="BtnRight_Click"/>
+
+                            <Button Grid.Row="2" Grid.Column="1" Content="▼"
+                                    Style="{StaticResource NavBtn}" x:Name="BtnBack"
+                                    IsEnabled="False" Click="BtnBack_Click"/>
+                        </Grid>
+
+                        <TextBlock Text="W  A  D  X  |  SPACE=DUR  |  ESC=İPTAL"
+                                   FontSize="8" Foreground="#30363D" FontFamily="Consolas"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="KOORDİNASYON" Style="{StaticResource SL}"/>
+
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="QR" FontSize="9" Foreground="#484F58"
+                                           FontFamily="Consolas" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="QrStatusText" Text="HAYIR"
+                                           FontSize="18" FontWeight="Bold" Foreground="#30363D"
+                                           FontFamily="Consolas" HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="SLAVE" FontSize="9" Foreground="#484F58"
+                                           FontFamily="Consolas" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="SlaveStateText" Text="IDLE"
+                                           FontSize="18" FontWeight="Bold" Foreground="#30363D"
+                                           FontFamily="Consolas" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock x:Name="CoordStatusText" Text="Bağlantı bekleniyor..."
+                                   FontSize="9" Foreground="#484F58" FontFamily="Consolas"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="MASTER GPS" Style="{StaticResource SL}"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="LAT " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                                <TextBlock x:Name="MasterLat" Text="—" Style="{StaticResource VT}" FontSize="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBlock Text="LON " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                                <TextBlock x:Name="MasterLon" Text="—" Style="{StaticResource VT}" FontSize="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Text="ALT " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                                <TextBlock x:Name="MasterAlt" Text="—" Style="{StaticResource VT}" FontSize="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                <Ellipse x:Name="MasterFixDot" Width="7" Height="7" Fill="#30363D"
+                                         VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock x:Name="MasterFixText" Text="NO FIX"
+                                           FontSize="10" Foreground="#30363D" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="MASTER BNO055" Style="{StaticResource SL}"/>
+
+                        <Grid Margin="0,0,0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="YAW" Foreground="#484F58" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="2" Height="7">
+                                <Border x:Name="MasterYawBar" Background="#F0AD4E" CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                            </Border>
+
+                            <TextBlock Grid.Column="2" x:Name="MasterYawText" Text="0°" Style="{StaticResource VT}" FontSize="10" TextAlignment="Right" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="PIT" Foreground="#484F58" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="2" Height="7">
+                                <Border x:Name="MasterPitchBar" Background="#58D6FF" CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                            </Border>
+
+                            <TextBlock Grid.Column="2" x:Name="MasterPitchText" Text="0°" Style="{StaticResource VT}" FontSize="10" TextAlignment="Right" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="ROL" Foreground="#484F58" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="2" Height="7">
+                                <Border x:Name="MasterRollBar" Background="#3FB950" CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                            </Border>
+
+                            <TextBlock Grid.Column="2" x:Name="MasterRollText" Text="0°" Style="{StaticResource VT}" FontSize="10" TextAlignment="Right" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <TextBlock x:Name="MasterCalText" Text="CAL: —" FontSize="9"
+                                   Foreground="#30363D" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="SON TX / RX" Style="{StaticResource SL}"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                            <TextBlock Text="TX → " Foreground="#1F6FEB" FontFamily="Consolas" FontSize="11"/>
+                            <TextBlock x:Name="LastTxText" Text="—" Style="{StaticResource VT}" FontSize="11"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="RX ← " Foreground="#3FB950" FontFamily="Consolas" FontSize="11"/>
+                            <TextBlock x:Name="LastRxText" Text="—" Style="{StaticResource VT}" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <Border Grid.Column="2" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="RASPBERRY PI CAMERA — AUTONOMOUS QR VIEW" Style="{StaticResource SL}"/>
+
+                    <Border Grid.Row="1" Background="#080B0F" CornerRadius="4">
+                        <Grid>
+                            <StackPanel x:Name="CamPlaceholder"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <TextBlock Text="📷"
+                                           FontSize="48"
+                                           HorizontalAlignment="Center"
+                                           Foreground="#21262D"/>
+                                <TextBlock Text="RPI STREAM YOK"
+                                           FontSize="16"
+                                           Foreground="#21262D"
+                                           FontFamily="Consolas"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,8,0,0"/>
+                                <TextBlock Text="RPI CAM URL gir → RPI STREAM tıkla"
+                                           FontSize="10"
+                                           Foreground="#30363D"
+                                           FontFamily="Consolas"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <Image x:Name="CamImage"
+                                   Stretch="Uniform"
+                                   Visibility="Collapsed"
+                                   RenderOptions.BitmapScalingMode="LowQuality"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="4" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="UNITY DIGITAL TWIN CAMERA VIEW" Style="{StaticResource SL}"/>
+                        <TextBlock x:Name="UnityConnectLabel"
+                                   Text="TCP: 127.0.0.1:7777"
+                                   FontSize="9"
+                                   Foreground="#30363D"
+                                   FontFamily="Consolas"
+                                   HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <Border Grid.Row="1" Background="#080B0F" CornerRadius="4">
+                        <Grid>
+                            <StackPanel x:Name="UnityCamPlaceholder"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <TextBlock Text="🖥"
+                                           FontSize="48"
+                                           HorizontalAlignment="Center"
+                                           Foreground="#21262D"/>
+                                <TextBlock Text="UNITY VIEW YOK"
+                                           FontSize="16"
+                                           Foreground="#21262D"
+                                           FontFamily="Consolas"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,8,0,0"/>
+                                <TextBlock Text="Unity Play → UNITY VIEW URL gir → UNITY VIEW tıkla"
+                                           FontSize="10"
+                                           Foreground="#30363D"
+                                           FontFamily="Consolas"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0"/>
+                                <TextBlock Text="Örnek: http://127.0.0.1:8080/stream"
+                                           FontSize="9"
+                                           Foreground="#21262D"
+                                           FontFamily="Consolas"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,8,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <wv2:WebView2 x:Name="UnityLiveView"
+                                          Visibility="Collapsed"/>
+
+                            <TextBlock x:Name="UnityOfflineText"
+                                       Text="UNITY TCP BAĞLI DEĞİL — 7777 KOMUT BAĞLANTISI BEKLENİYOR"
+                                       FontSize="10"
+                                       Foreground="#21262D"
+                                       FontFamily="Consolas"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,8"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Column="6">
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="SLAVE GPS" Style="{StaticResource SL}"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="LAT " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                                <TextBlock x:Name="SlaveLat" Text="—" Style="{StaticResource VT}" FontSize="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBlock Text="LON " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                                <TextBlock x:Name="SlaveLon" Text="—" Style="{StaticResource VT}" FontSize="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Text="ALT " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                                <TextBlock x:Name="SlaveAlt" Text="—" Style="{StaticResource VT}" FontSize="10"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                <Ellipse x:Name="SlaveFixDot" Width="7" Height="7" Fill="#30363D"
+                                         VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock x:Name="SlaveFixText" Text="NO FIX"
+                                           FontSize="10" Foreground="#30363D" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="SLAVE BNO055" Style="{StaticResource SL}"/>
+
+                        <Grid Margin="0,0,0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="YAW" Foreground="#484F58" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="2" Height="7">
+                                <Border x:Name="SlaveYawBar" Background="#F0AD4E" CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                            </Border>
+
+                            <TextBlock Grid.Column="2" x:Name="SlaveYawText" Text="0°" Style="{StaticResource VT}" FontSize="10" TextAlignment="Right" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="PIT" Foreground="#484F58" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="2" Height="7">
+                                <Border x:Name="SlavePitchBar" Background="#58D6FF" CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                            </Border>
+
+                            <TextBlock Grid.Column="2" x:Name="SlavePitchText" Text="0°" Style="{StaticResource VT}" FontSize="10" TextAlignment="Right" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="48"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="ROL" Foreground="#484F58" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="2" Height="7">
+                                <Border x:Name="SlaveRollBar" Background="#3FB950" CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                            </Border>
+
+                            <TextBlock Grid.Column="2" x:Name="SlaveRollText" Text="0°" Style="{StaticResource VT}" FontSize="10" TextAlignment="Right" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <TextBlock x:Name="SlaveCalText" Text="CAL: —" FontSize="9"
+                                   Foreground="#30363D" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,5">
+                    <StackPanel>
+                        <TextBlock Text="SLAVE — NAVİGASYON" Style="{StaticResource SL}"/>
+
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="HEDEF LAT" FontSize="9" Foreground="#484F58" FontFamily="Consolas"/>
+                                <TextBlock x:Name="SlaveTargetLat" Text="—" Style="{StaticResource VT}" FontSize="11"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="HEDEF LON" FontSize="9" Foreground="#484F58" FontFamily="Consolas"/>
+                                <TextBlock x:Name="SlaveTargetLon" Text="—" Style="{StaticResource VT}" FontSize="11"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="MESAFE  " Foreground="#484F58" FontFamily="Consolas" FontSize="10"/>
+                            <TextBlock x:Name="SlaveDistText" Text="— m" FontSize="13" FontWeight="Bold"
+                                       Foreground="#A78BFA" FontFamily="Consolas"/>
+                        </StackPanel>
+
+                        <Border Background="#080B0F" CornerRadius="3" Margin="0,6,0,0" Padding="8,4">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="SlaveStateDot" Width="8" Height="8"
+                                         Fill="#30363D" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="SlaveStateDetailText"
+                                           Text="IDLE — Hedef bekleniyor"
+                                           FontSize="10" Foreground="#484F58" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="MASTER — NAVİGASYON" Style="{StaticResource SL}"/>
+
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="HEDEF LAT" FontSize="9" Foreground="#484F58" FontFamily="Consolas"/>
+                                <TextBlock x:Name="TargetLatText" Text="—" Style="{StaticResource VT}" FontSize="11"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="HEDEF LON" FontSize="9" Foreground="#484F58" FontFamily="Consolas"/>
+                                <TextBlock x:Name="TargetLonText" Text="—" Style="{StaticResource VT}" FontSize="11"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="MESAFE" FontSize="9" Foreground="#484F58" FontFamily="Consolas"/>
+                                <TextBlock x:Name="TargetDistText" Text="— m" FontSize="13" FontWeight="Bold"
+                                           Foreground="#F0AD4E" FontFamily="Consolas"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="BEARING" FontSize="9" Foreground="#484F58" FontFamily="Consolas"/>
+                                <TextBlock x:Name="BearingText" Text="—°" FontSize="13" FontWeight="Bold"
+                                           Foreground="#58D6FF" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock x:Name="QrSourceText" Text="—" FontSize="9"
+                                   Foreground="#30363D" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="4" Background="#0D1117" BorderBrush="#21262D" BorderThickness="0,1,0,0">
+            <Grid Margin="8,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                    <TextBlock Text="SİSTEM LOGU" Foreground="#484F58" FontSize="9"
+                               FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,14,0"/>
+
+                    <Button Content="KAYDET" Style="{StaticResource ActionBtn}"
+                            Click="BtnSaveLog_Click" Margin="0,0,4,0"/>
+
+                    <Button Content="AÇ" Style="{StaticResource ActionBtn}"
+                            Click="BtnOpenLog_Click" Foreground="#58D6FF"
+                            BorderBrush="#1F6FEB" Background="#0D1F3C" Margin="0,0,4,0"/>
+
+                    <Button Content="TEMİZLE" Style="{StaticResource ActionBtn}"
+                            Click="BtnClearLog_Click" Foreground="#484F58"
+                            BorderBrush="#21262D" Background="Transparent"/>
+
+                    <TextBlock x:Name="LogFilePathText" Text="" FontSize="9"
+                               Foreground="#30363D" FontFamily="Consolas"
+                               VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" x:Name="LogScroll"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="LogPanel"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

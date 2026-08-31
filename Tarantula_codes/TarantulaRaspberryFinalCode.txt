@@ -1,0 +1,141 @@
+import cv2
+from pyzbar import pyzbar
+from flask import Flask, Response, render_template_string
+import time
+import os
+import serial
+import threading
+
+app = Flask(__name__)
+LOG_FILE = "detected_qrs.txt"
+
+# UART Bağlantısı
+ser = serial.Serial('/dev/serial0', 115200, timeout=1)
+detected_data_set = set()
+
+guncel_kare = None
+pano_kilidi = threading.Lock()
+
+# Eski logları hafızaya al
+if os.path.exists(LOG_FILE):
+    with open(LOG_FILE, "r") as f:
+        for line in f:
+            if "-> " in line:
+                data = line.split("-> ")[1].strip()
+                detected_data_set.add(data)
+
+# Kamerayı başlat
+cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+time.sleep(2.0)
+
+def kamera_dinleyici():
+   
+    global guncel_kare
+
+    while True:
+        ret, frame = cap.read()
+        if not ret or frame is None:
+            time.sleep(0.1)
+            continue
+            
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        barcodes = pyzbar.decode(gray_frame)
+
+        for barcode in barcodes:
+            (x, y, w, h) = barcode.rect
+            barcode_data = barcode.data.decode("utf-8")
+
+            # Eğer yeni bir QR kod ise
+            if barcode_data not in detected_data_set:
+                detected_data_set.add(barcode_data)
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                with open(LOG_FILE, "a") as f:
+                    f.write(f"[{timestamp}] -> {barcode_data}\n")
+                
+                
+                               if not barcode_data.startswith("$QR:"):
+                    veri_paketi = f"$QR:{barcode_data}\n"
+                else:
+                    veri_paketi = f"{barcode_data}\n"
+
+                               ser.write(veri_paketi.encode('utf-8'))
+              
+                print(f"[NEW QR] Paketlendi ve STM32'ye yollandı: {veri_paketi.strip()}")
+                color = (0, 255, 0)
+            else:
+                color = (255, 0, 0)
+
+            cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+
+        ret, buffer = cv2.imencode('.jpg', frame)
+        if ret:
+            with pano_kilidi:
+                guncel_kare = buffer.tobytes()
+                
+        time.sleep(0.01)
+
+def yayin_yap():
+   "
+    global guncel_kare
+    while True:
+        with pano_kilidi:
+            if guncel_kare is None:
+                kare_kopyasi = None
+            else:
+                kare_kopyasi = guncel_kare
+
+        if kare_kopyasi is not None:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + kare_kopyasi + b'\r\n')
+
+        time.sleep(0.03)
+
+@app.route('/')
+def index():
+    html_page = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Tarantula Otonom Kamera</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body { background-color: #121212; color: #ffffff; text-align: center; font-family: Arial, sans-serif; margin-top: 30px; }
+            img { border: 3px solid #00ff00; border-radius: 8px; max-width: 90%; height: auto; box-shadow: 0px 0px 15px #00ff00; }
+            h2 { color: #00ff00; }
+            p { color: #aaaaaa; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <h2>Tarantula Sürü Robotu</h2>
+        <p>Lider-Takipçi Haberleşme Düğümü - STM32 Aktif</p>
+        <img src="/video" alt="Canlı Kamera Akışı">
+    </body>
+    </html>
+    """
+    return render_template_string(html_page)
+
+@app.route('/video')
+def video_feed():
+    return Response(yayin_yap(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/snapshot')
+def snapshot():
+    with pano_kilidi:
+        if guncel_kare is not None:
+            return Response(guncel_kare, mimetype='image/jpeg')
+        else:
+            return "The image not ready yet", 404
+
+if __name__ == "__main__":
+    print("\n" + "="*50)
+    print("[SYSTEM READY] Autonomous QR Scanner (Multi-Client)")
+    print("UART Port: /dev/serial0 (115200 baud)")
+    print("="*50 + "\n")
+
+    isci_thread = threading.Thread(target=kamera_dinleyici)
+    isci_thread.daemon = True
+    isci_thread.start()
+    
+    app.run(host='0.0.0.0', port=5000, threaded=True)
